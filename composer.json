@@ -1,0 +1,25 @@
+{
+    "name": "fbf/laravel-downloads",
+    "description": "A Laravel 4 package for adding content managed 'downloads' to a site",
+    "license" : "MIT",
+    "authors": [
+        {
+            "name": "Neil Crookes",
+            "email": "neil.crookes@fivebyfiveuk.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations",
+            "src/models"
+        ],
+        "psr-0": {
+            "Fbf\\LaravelDownloads\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
