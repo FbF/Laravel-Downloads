@@ -38,11 +38,18 @@ class Download extends \Eloquent {
 					}
 				}
 			}
+			// If a download is edited and the image is changed...
+			if (array_key_exists('image', $dirty) && $model->exists)
+			{
+				$oldImageFilename = self::where($model->getKeyName(),'=',$model->id)->first()->pluck('image');
+				$model->deleteImageFiles($oldImageFilename);
+			}
 		});
 
 		static::deleted(function($model)
 		{
 			$model->deleteFile();
+			$model->deleteImageFiles();
 		});
 	}
 
@@ -81,7 +88,34 @@ class Download extends \Eloquent {
 	 */
 	protected function deleteFile($filename = null)
 	{
-		unlink($this->getAbsolutePath($filename));
+		$file = $this->getAbsolutePath($filename);
+		if (file_exists($file) && is_file($file))
+		{
+			@unlink($file);
+		}
+	}
+
+	/**
+	 * Deletes the image files for the given imageFilename. If imageFilename is not passed, use the current record's
+	 * image filename.
+	 *
+	 * @param string $imageFilename
+	 */
+	protected function deleteImageFiles($imageFilename = null)
+	{
+		$file = $this->getImageAbsolutePath('original', $imageFilename);
+		if (file_exists($file) && is_file($file))
+		{
+			@unlink($file);
+		}
+		foreach (\Config::get("laravel-downloads::image.sizes") as $type => $settings)
+		{
+			$file = $this->getImageAbsolutePath($type, $imageFilename);
+			if (file_exists($file) && is_file($file))
+			{
+				@unlink($file);
+			}
+		}
 	}
 
 	/**
@@ -185,7 +219,7 @@ class Download extends \Eloquent {
 	 */
 	public function getImageAbsolutePath($type = 'original', $imageFilename = null)
 	{
-		return public_path($this->getRelativePath($type, $imageFilename));
+		return public_path($this->getImageRelativePath($type, $imageFilename));
 	}
 
 }
